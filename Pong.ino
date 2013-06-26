@@ -8,8 +8,8 @@
 #define button_m 20
 
 // Define pins used by SPI to communicate with LCD display
-#define cs   10  // chip select
-#define dc   9  // 
+#define cs   10
+#define dc   9
 #define rst  8  // you can also connect this to the Arduino reset
 
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -98,6 +98,10 @@ void loop() {
   ball_y += ball_ydir;
   // If ball gets behind player, it's gone
   if (ball_x > WIDTH) {
+    player1_score++;
+    ball_xdir *= -1;
+  }
+  if (ball_x < 0) {
     player1_score++;
     reset_ball();
   }

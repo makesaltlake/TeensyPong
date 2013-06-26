@@ -1,3 +1,4 @@
+
 // Define pins used by potentiometer knobs
 #define paddle_l 16
 #define paddle_r 15
@@ -25,7 +26,8 @@ Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, rst);
 
 #define PADDLE_SIZE 30
 
-int player1_pos = 0, player1_score = 0;
+int player1_Xpos = 2,  player1_Ypos = 0, player1_score = 0;       // horizontal starting position, verticla starting position, starting score
+int player2_Xpos = WIDTH-2, player2_Ypos = 0, player2_score = 0;
 
 float ball_x, ball_y;
 float ball_xdir, ball_ydir;
@@ -50,11 +52,11 @@ void draw_score(int player, int value, int color) {
 }
 
 void reset_ball() {
-  ball_x = WIDTH/2;
-  ball_y = HEIGHT/2;
-  ball_xdir = 2.5;
-  if(random(2) == 0) ball_xdir *= -1;
-  ball_ydir = random(0, 5)/2;
+  ball_x = WIDTH/2;    // center the ball x
+  ball_y = HEIGHT/2;   // center the ball y
+  ball_xdir = 2.5;     // set the speed to a baseline 2.5
+  if(random(2) == 0) ball_xdir *= -1;  // randomizes directon toward the left or right
+  ball_ydir = random(0, 5)/2;  // randomizes the up or down movement
 }
 
 void setup(void) {
@@ -65,21 +67,23 @@ void setup(void) {
   pinMode(button_m, INPUT);
   
   tft.initR(INITR_REDTAB);   // alternative: INITR_GREENTAB
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(ST7735_BLACK);  // sets background color
   delay(500);
 
   tft.setTextSize(1);
   
-  reset_ball();
+  reset_ball();  // centers ball on screen and sets direction randomly
 }
 
 void loop() {
-  draw_ball(ball_x, ball_y, ST7735_BLACK);
-  draw_paddle(4, player1_pos, ST7735_BLACK);
+  draw_ball(ball_x, ball_y, ST7735_BLACK);   // draw ball (x point, y point, color)
+  draw_paddle(player1_Xpos, player1_Ypos, ST7735_BLACK); // draw paddle (height, left or right player, replacement background)
+  draw_paddle(player2_Xpos, player2_Ypos, ST7735_BLACK); // draw paddle (height, left or right player, replacement background)
 
-  draw_score(1, player1_score, ST7735_BLACK);
+  draw_score(1, player1_score, ST7735_BLACK);  // draw score (player number, player score, replacement background)  // overwriting old score
 
-  player1_pos = HEIGHT - (analogRead(paddle_l) * HEIGHT / ANALOG_MAX);
+  player1_Ypos = HEIGHT - (analogRead(paddle_l) * HEIGHT / ANALOG_MAX);  // read left potentiometer position, based on height set player 1 position
+  player2_Ypos = HEIGHT - (analogRead(paddle_r) * HEIGHT / ANALOG_MAX);  // read right potentiometer position, based on height set player 2 position
 
   // If ball goes to top or bottom, just bounce
   if (ball_y < 4 || ball_y > HEIGHT-4) {
@@ -88,10 +92,10 @@ void loop() {
 
   // If ball hits player 1's paddle, bounce
   if (ball_x > 4 && ball_x < 8 &&
-      ball_y > (player1_pos - PADDLE_SIZE/2) &&
-      ball_y < (player1_pos + PADDLE_SIZE/2)) {
+      ball_y > (player1_Ypos - PADDLE_SIZE/2) &&
+      ball_y < (player1_Ypos + PADDLE_SIZE/2)) {
     ball_xdir *= -1;
-    ball_ydir += (ball_y - player1_pos) / PADDLE_SIZE * 2.5;
+    ball_ydir += (ball_y - player1_Ypos) / PADDLE_SIZE * 2.5;
   }
   
   ball_x += ball_xdir;
@@ -107,7 +111,8 @@ void loop() {
   }
     
   draw_ball(ball_x, ball_y, ST7735_BLUE);
-  draw_paddle(4, player1_pos, ST7735_WHITE);
+  draw_paddle(player1_Xpos, player1_Ypos, ST7735_WHITE); // paddle height, player side and potentiometer position, paddle color
+  draw_paddle(player2_Xpos, player2_Ypos, ST7735_WHITE);
   
   draw_score(1, player1_score, ST7735_RED);
   
